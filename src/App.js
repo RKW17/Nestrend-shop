@@ -14,6 +14,7 @@ import {
 import Shop from "./pages/Shop";
 import Admin from "./pages/Admin";
 
+
 // --- 1. SETTINGS & HELPERS ---
 // Connecting to your specific Supabase Cloud project
 const supabase = createClient(
