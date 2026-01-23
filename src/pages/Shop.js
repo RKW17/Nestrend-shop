@@ -344,12 +344,18 @@ const Shop = ({
             </div>
             <div style={checkoutSection}>
               <div style={momoLuxeCard}>
-               <span style={{ fontWeight: 'bold', display: 'block' }}>
-  Momo:  0245637030
-</span>
-<span style={{  fontWeight: 'bold', color: '#D4AF37"', display: 'block' }}>
-  Account Name: Grace Antwiwaa Asirifi
-</span>
+                <span style={{ fontWeight: "bold", display: "block" }}>
+                  Momo: 0245637030
+                </span>
+                <span
+                  style={{
+                    fontWeight: "bold",
+                    color: '#D4AF37"',
+                    display: "block",
+                  }}
+                >
+                  Account Name: Grace Antwiwaa Asirifi
+                </span>
                 <label style={uploadMomo}>
                   <Camera size={20} />{" "}
                   {momoReceipt ? "RECEIPT LOADED" : "UPLOAD RECEIPT"}
@@ -678,3 +684,5 @@ const soldOutOverlay = {
 };
 
 export default Shop;
+export const supabaseKey =
+  process.env.sb_publishable_UhA0rRAcW4IvuwzueIDOtQ_xciyqqpr;

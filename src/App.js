@@ -18,8 +18,8 @@ import Admin from "./pages/Admin";
 // --- 1. SETTINGS & HELPERS ---
 // Connecting to your specific Supabase Cloud project
 const supabase = createClient(
-  'https://uharacw4ivuzueidotqx.supabase.co', 
-  'sb_publishable_UhA0rRAcW4IvuwzueIDOtQ_xciyqqpr'
+  'https://tqifawxmxstcauuzvwte.supabase.co',
+  process.env.sb_publishable_UhA0rRAcW4IvuwzueIDOtQ_xciyqqpr
 );
 
 export const formatGHS = (amount) =>
