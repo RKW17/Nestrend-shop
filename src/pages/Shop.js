@@ -13,20 +13,9 @@ import {
 } from "lucide-react";
 import { formatGHS } from "../App";
 
-const Shop = ({
-  products,
-  cart,
-  setCart,
-  category,
-  subcategory,
-  setSubcategory,
-  showCart,
-  setShowCart,
-  cartTotal,
-  searchQuery,
-  setOrders,
-  subcategoryMap,
-}) => {
+const Shop = function ({
+  products, cart, setCart, category, subcategory, setSubcategory, showCart, setShowCart, cartTotal, searchQuery, setOrders, subcategoryMap,
+}) {
   const [selected, setSelected] = useState(null);
   const [qty, setQty] = useState(1);
   const [color, setColor] = useState("");
@@ -49,7 +38,7 @@ const Shop = ({
           setGeoLink(link);
           alert("Live GPS location captured!");
         },
-        () => alert("Location access denied."),
+        () => alert("Location access denied.")
       );
     }
   };
@@ -107,8 +96,7 @@ const Shop = ({
 
     const itemDetails = cart
       .map(
-        (i) =>
-          `${i.name} ${i.chosenSize ? `(Size: ${i.chosenSize})` : ""} (x${i.qty})`,
+        (i) => `${i.name} ${i.chosenSize ? `(Size: ${i.chosenSize})` : ""} (x${i.qty})`
       )
       .join("\n");
 
@@ -157,7 +145,7 @@ const Shop = ({
               onClick={() => {
                 setShowSuccess(false);
                 setShowCart(false);
-              }}
+              } }
               style={completeBtn}
             >
               RETURN TO SHOP
@@ -173,10 +161,8 @@ const Shop = ({
             const matchesSearch = p.name
               .toLowerCase()
               .includes(searchQuery.toLowerCase());
-            const matchesCategory =
-              category === "All" || p.category === category;
-            const matchesSub =
-              subcategory === "All" ||
+            const matchesCategory = category === "All" || p.category === category;
+            const matchesSub = subcategory === "All" ||
               !subcategory ||
               p.subcategory === subcategory;
             return matchesSearch && matchesCategory && matchesSub;
@@ -220,10 +206,9 @@ const Shop = ({
                           onClick={() => setSelSize(s.trim())}
                           style={{
                             padding: "10px 18px",
-                            border:
-                              selSize === s.trim()
-                                ? "2px solid #D4AF37"
-                                : "1px solid #000",
+                            border: selSize === s.trim()
+                              ? "2px solid #D4AF37"
+                              : "1px solid #000",
                             background: selSize === s.trim() ? "#000" : "#fff",
                             color: selSize === s.trim() ? "#D4AF37" : "#000",
                             fontWeight: "900",
@@ -266,14 +251,12 @@ const Shop = ({
                       <Minus
                         size={22}
                         onClick={() => qty > 1 && setQty(qty - 1)}
-                        style={{ cursor: "pointer" }}
-                      />
+                        style={{ cursor: "pointer" }} />
                       <span>{qty}</span>
                       <Plus
                         size={22}
                         onClick={() => setQty(qty + 1)}
-                        style={{ cursor: "pointer" }}
-                      />
+                        style={{ cursor: "pointer" }} />
                     </div>
                   </div>
                 </div>
@@ -301,8 +284,7 @@ const Shop = ({
               <X
                 onClick={() => setShowCart(false)}
                 style={{ cursor: "pointer" }}
-                size={28}
-              />
+                size={28} />
             </div>
             <div style={{ flex: 1, overflowY: "auto", padding: "20px" }}>
               {cart.length === 0 ? (
@@ -336,8 +318,7 @@ const Shop = ({
                       size={18}
                       onClick={() => setCart(cart.filter((_, i) => i !== idx))}
                       color="red"
-                      style={{ cursor: "pointer" }}
-                    />
+                      style={{ cursor: "pointer" }} />
                   </div>
                 ))
               )}
@@ -362,30 +343,21 @@ const Shop = ({
                   <input
                     type="file"
                     hidden
-                    onChange={(e) => setMomoReceipt(e.target.files[0])}
-                  />
+                    onChange={(e) => setMomoReceipt(e.target.files[0])} />
                 </label>
               </div>
               <input
                 placeholder="Full Name"
                 style={luxeInput}
-                onChange={(e) =>
-                  setDetails({ ...details, name: e.target.value })
-                }
-              />
+                onChange={(e) => setDetails({ ...details, name: e.target.value })} />
               <input
                 placeholder="Phone Number"
                 style={luxeInput}
-                onChange={(e) =>
-                  setDetails({ ...details, phone: e.target.value })
-                }
-              />
+                onChange={(e) => setDetails({ ...details, phone: e.target.value })} />
 
               <select
                 style={luxeInput}
-                onChange={(e) =>
-                  setDetails({ ...details, region: e.target.value })
-                }
+                onChange={(e) => setDetails({ ...details, region: e.target.value })}
               >
                 <option value="">Select Region</option>
                 {[
@@ -414,15 +386,11 @@ const Shop = ({
                     left: "15px",
                     top: "18px",
                     color: "#888",
-                  }}
-                />
+                  }} />
                 <input
                   placeholder="Address / Landmark..."
                   style={{ ...luxeInput, paddingLeft: "45px" }}
-                  onChange={(e) =>
-                    setDetails({ ...details, location: e.target.value })
-                  }
-                />
+                  onChange={(e) => setDetails({ ...details, location: e.target.value })} />
                 <button
                   onClick={getLiveLocation}
                   style={{
@@ -684,5 +652,4 @@ const soldOutOverlay = {
 };
 
 export default Shop;
-export const supabaseKey =
-  process.env.sb_publishable_UhA0rRAcW4IvuwzueIDOtQ_xciyqqpr;
+export const supabaseKey = 'sb_publishable_UhA0rRAcW4IvuwzueIDOtQ_xciyqqpr';
