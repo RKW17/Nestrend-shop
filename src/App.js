@@ -1,6 +1,5 @@
 import { useState, useEffect } from "react";
 import { BrowserRouter as Router, Routes, Route, Link } from "react-router-dom";
-// Change these lines at the top of App.js
 import Admin from "./pages/Admin"; 
 import Shop from "./pages/Shop";
 import {
@@ -13,14 +12,8 @@ import {
   X,
   ChevronDown,
 } from "lucide-react";
-
-// 1. IMPORT YOUR NEW FIREBASE SETTINGS
 import { db } from "./firebase";
 import { collection, onSnapshot } from "firebase/firestore";
-
-import Shop from "./pages/Shop";
-import Admin from "./pages/Admin";
-
 export const formatGHS = (amount) =>
   `GH₵${parseFloat(amount || 0).toLocaleString("en-GH", {
     minimumFractionDigits: 2,
