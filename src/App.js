@@ -1,6 +1,5 @@
 import { useState, useEffect } from "react";
 import { BrowserRouter as Router, Routes, Route, Link } from "react-router-dom";
-import { createClient } from '@supabase/supabase-js'; 
 import {
   ShoppingBag,
   ShieldCheck,
@@ -11,38 +10,34 @@ import {
   X,
   ChevronDown,
 } from "lucide-react";
+
+// 1. IMPORT YOUR NEW FIREBASE SETTINGS
+import { db } from "./firebase";
+import { collection, onSnapshot,  } from "firebase/firestore";
+
 import Shop from "./pages/Shop";
 import Admin from "./pages/Admin";
 
-
-// --- 1. SETTINGS & HELPERS ---
-// Connecting to your specific Supabase Cloud project
-const supabase = createClient(
-  'https://tqifawxmxstcauuzvwte.supabase.co',
-  process.env.sb_publishable_UhA0rRAcW4IvuwzueIDOtQ_xciyqqpr
-);
-
 export const formatGHS = (amount) =>
-  `GH₵${parseFloat(amount).toLocaleString("en-GH", {
+  `GH₵${parseFloat(amount || 0).toLocaleString("en-GH", {
     minimumFractionDigits: 2,
   })}`;
 
 const subcategoryMap = {
   "Beauty & Personal Care": ["Wigs & Hair Extensions", "Skincare", "Haircare", "Makeup", "Personal Hygiene"],
   "Fashion & Apparel": ["Men's Clothing", "Women's Clothing", "Footwear", "Fashion Accessories"],
-  Electronics: ["Mobile Phones", "Computers", "Audio", "Smart Gadgets"],
+  "Electronics": ["Mobile Phones", "Computers", "Audio", "Smart Gadgets"],
   "Mobile Accessories": ["Phone Cases", "Chargers", "Screen Protectors", "Power Banks", "Earphones & Headphones", "Smartwatches", "Phone Holders/Stands"],
   "Home & Living": ["Home Essentials", "Kitchen & Dining", "Home Utilities", "Home Appliances"],
 };
 
 export default function App() {
-  // --- 2. STATE ---
-  const [products, setProducts] = useState([]); 
+  const [products, setProducts] = useState([]);
   const [adminProfilePic, setAdminProfilePic] = useState(
     () => localStorage.getItem("nextrend_admin_pic") || null,
   );
   const [cart, setCart] = useState([]);
-  const [orders, setOrders] = useState([]);
+  const [orders, setOrders] = useState([]); // This holds your Pending Orders
   const [category, setCategory] = useState("All");
   const [subcategory, setSubcategory] = useState("All");
   const [showCart, setShowCart] = useState(false);
@@ -51,28 +46,29 @@ export default function App() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [expandedCat, setExpandedCat] = useState(null);
 
-  // --- 3. CLOUD SYNC ---
-  // This pulls the latest items from the cloud for all customers
-  const fetchProducts = async () => {
-    const { data, error } = await supabase
-      .from('products')
-      .select('*')
-      .order('id', { ascending: false });
-    
-    if (error) {
-      console.error("Fetch Error:", error.message);
-    } else {
-      setProducts(data || []);
-    }
-  };
-
+  // 2. REAL-TIME CLOUD LISTENERS
   useEffect(() => {
-    fetchProducts();
+    // Listen for Products
+    const unsubProducts = onSnapshot(collection(db, "products"), (snapshot) => {
+      const items = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+      setProducts(items);
+    });
+
+    // Listen for Orders (Pending Requests)
+    const unsubOrders = onSnapshot(collection(db, "orders"), (snapshot) => {
+      const orderItems = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+      setOrders(orderItems);
+    });
+
     localStorage.setItem("nextrend_admin_pic", adminProfilePic || "");
+
+    return () => {
+      unsubProducts();
+      unsubOrders();
+    };
   }, [adminProfilePic]);
 
-  // FIX: Added safety check for item price to prevent NaN errors
-  const cartTotal = cart.reduce((acc, item) => acc + (Number(item.price || 0) * (item.qty || 1)), 0);
+  const cartTotal = cart.reduce((acc, item) => acc + (item.price * item.qty), 0);
 
   const categories = [
     { name: "All", img: "https://images.unsplash.com/photo-1441986300917-64674bd600d8?q=80&w=200" },
@@ -96,7 +92,7 @@ export default function App() {
         body { font-family: 'Montserrat', sans-serif; margin: 0; background: #fff; }
       `}</style>
 
-      {/* HAMBURGER SIDEBAR */}
+      {/* SIDEBAR MENU */}
       {isMenuOpen && (
         <div style={menuOverlay}>
           <div style={menuDrawer}>
@@ -132,18 +128,16 @@ export default function App() {
         </div>
       )}
 
-      {/* TOP HEADER */}
+      {/* HEADER */}
       <header style={luxuryHeader}>
         <div style={overlay}>
-          <h1 style={logoStyle}>
-            NEX<span style={{ color: "#D4AF37" }}>TREND</span>
-          </h1>
+          <h1 style={logoStyle}>NEX<span style={{ color: "#D4AF37" }}>TREND</span></h1>
           <p style={tagline}>YOUR WISH IS OUR COMMAND</p>
           <p style={subTagline}>HOME OF UNIQUE LUXURY</p>
         </div>
       </header>
 
-      {/* TOP CATEGORY BUBBLES */}
+      {/* NAVIGATION */}
       <nav style={stickyNav}>
         <Menu onClick={() => setIsMenuOpen(true)} style={{ cursor: "pointer", marginRight: "20px" }} size={28} />
         <div style={navContainer}>
@@ -157,9 +151,7 @@ export default function App() {
                 <div style={{ ...catImgWrapper, borderColor: category === cat.name ? "#D4AF37" : "transparent" }}>
                   <img src={cat.img} alt={cat.name} style={catImgStyle} />
                 </div>
-                <span style={{ ...catLabel, color: category === cat.name ? "#D4AF37" : "#000" }}>
-                  {cat.name.toUpperCase()}
-                </span>
+                <span style={{ ...catLabel, color: category === cat.name ? "#D4AF37" : "#000" }}>{cat.name.toUpperCase()}</span>
               </button>
             ))}
           </div>
@@ -177,66 +169,50 @@ export default function App() {
 
       <Routes>
         <Route path="/" element={
-            <Shop
-              products={products}
-              cart={cart}
-              setCart={setCart}
-              category={category}
-              subcategory={subcategory}
-              setSubcategory={setSubcategory}
-              showCart={showCart}
-              setShowCart={setShowCart}
-              cartTotal={cartTotal}
-              searchQuery={searchQuery}
-              setOrders={setOrders}
-              subcategoryMap={subcategoryMap}
-            />
-          }
-        />
+          <Shop 
+            products={products} 
+            cart={cart} 
+            setCart={setCart} 
+            category={category} 
+            subcategory={subcategory} 
+            setSubcategory={setSubcategory} 
+            showCart={showCart} 
+            setShowCart={setShowCart} 
+            cartTotal={cartTotal} 
+            searchQuery={searchQuery} 
+            setOrders={setOrders} 
+            subcategoryMap={subcategoryMap} 
+          />
+        } />
         <Route path="/admin" element={
-            <Admin
-              products={products}
-              setProducts={setProducts}
-              isAdmin={isAdmin}
-              setIsAdmin={setIsAdmin}
-              orders={orders}
-              setOrders={setOrders}
-              adminProfilePic={adminProfilePic}
-              setAdminProfilePic={setAdminProfilePic}
-              fetchProducts={fetchProducts} 
-            />
-          }
-        />
+          <Admin 
+            products={products} 
+            setProducts={setProducts}
+            isAdmin={isAdmin} 
+            setIsAdmin={setIsAdmin} 
+            orders={orders} 
+            setOrders={setOrders}
+            adminProfilePic={adminProfilePic} 
+            setAdminProfilePic={setAdminProfilePic} 
+          />
+        } />
       </Routes>
 
-      {/* FOOTER */}
       <footer style={luxuryFooter}>
-        <h2 style={{ fontFamily: "Playfair Display", letterSpacing: "6px", fontSize: "32px" }}>
-          NEX<span style={{ color: "#D4AF37" }}>TREND</span>
-        </h2>
+        <h2 style={{ fontFamily: "Playfair Display", letterSpacing: "6px", fontSize: "32px" }}>NEX<span style={{ color: "#D4AF37" }}>TREND</span></h2>
         <p style={footerTag}>YOUR WISH IS OUR COMMAND</p>
         <p style={footerSubTagline}>HOME OF UNIQUE LUXURY</p>
         <div style={contactBox}>
-          <div style={contactItem}>
-            <Mail size={18} color="#D4AF37" />
-            <a href="mailto:Asirifigraceantwiwaa@gmail.com" style={{ color: "#fff", textDecoration: "none" }}>
-              Asirifigraceantwiwaa@gmail.com
-            </a>
-          </div>
-          <div style={contactItem}>
-            <Phone size={18} color="#D4AF37" />
-            <span>Manager: +233 50 400 3676</span>
-          </div>
+          <div style={contactItem}><Mail size={18} color="#D4AF37" /><a href="mailto:Asirifigraceantwiwaa@gmail.com" style={{ color: "#fff", textDecoration: "none" }}>Asirifigraceantwiwaa@gmail.com</a></div>
+          <div style={contactItem}><Phone size={18} color="#D4AF37" /><span>Manager: +233 50 400 3676</span></div>
         </div>
-        <div style={devSection}>
-          <p style={devText}>© 2026 | ENGINEERED BY <span style={devName}>BRAINY SYSTEMS</span></p>
-        </div>
+        <div style={devSection}><p style={devText}>© 2026 | ENGINEERED BY <span style={devName}>BRAINY SYSTEMS</span></p></div>
       </footer>
     </Router>
   );
 }
 
-// --- STYLES ---
+// STYLES (Keep exactly as they were in your code)
 const luxuryHeader = { height: "260px", backgroundImage: 'url("https://images.unsplash.com/photo-1441986300917-64674bd600d8?auto=format&fit=crop&q=80&w=2070")', backgroundSize: "cover", backgroundPosition: "center", position: "relative" };
 const overlay = { position: "absolute", inset: 0, background: "rgba(0,0,0,0.6)", display: "flex", flexDirection: "column", justifyContent: "center", alignItems: "center", color: "#fff" };
 const logoStyle = { fontFamily: "Playfair Display", fontSize: "45px", margin: 0, letterSpacing: "8px" };
