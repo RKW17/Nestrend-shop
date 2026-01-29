@@ -1,7 +1,8 @@
 import { useState, useEffect } from "react";
 import { BrowserRouter as Router, Routes, Route, Link } from "react-router-dom";
-import Admin from "./pages/Admin"; // Note the /pages/
-import Shop from "./pages/Shop";   // Note the /pages/
+// Change these lines at the top of App.js
+import Admin from "./pages/Admin"; 
+import Shop from "./pages/Shop";
 import {
   ShoppingBag,
   ShieldCheck,
