@@ -327,7 +327,7 @@ export default function App() {
         </div>
         <div style={devSection}>
           <p style={devText}>
-            © 2026 | ENGINEERED BY <span style={devName}>BRAINY SYSTEMS</span>
+            © 2026 | ENGINEERED BY <span style={devName}>RICHARD KWESI WALIBA</span>
           </p>
         </div>
       </footer>
