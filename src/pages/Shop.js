@@ -34,7 +34,7 @@ const Shop = function ({
   const [selected, setSelected] = useState(null);
   const [qty, setQty] = useState(1);
   const [color, setColor] = useState("");
-  const [selSize, setSelSize] = useState("");
+  const [selSize, setSelSize] = useState(""); // State for selected size
   const [momoReceipt, setMomoReceipt] = useState(null);
   const [showSuccess, setShowSuccess] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
@@ -52,7 +52,6 @@ const Shop = function ({
   const [revText, setRevText] = useState("");
   const [revRating, setRevRating] = useState(5);
 
-  // Sync Orders
   useEffect(() => {
     const q = query(collection(db, "orders"), orderBy("date", "desc"));
     const unsubscribe = onSnapshot(q, (snapshot) => {
@@ -62,7 +61,6 @@ const Shop = function ({
     return () => unsubscribe();
   }, [setOrders]);
 
-  // Load Reviews
   useEffect(() => {
     const q = query(collection(db, "reviews"), orderBy("date", "desc"));
     const unsubscribe = onSnapshot(q, (snapshot) => {
@@ -71,7 +69,6 @@ const Shop = function ({
     return () => unsubscribe();
   }, []);
 
-  // Filter Reviews for selected product
   useEffect(() => {
     if (selected) {
       const q = query(collection(db, "reviews"), where("productId", "==", selected.id), orderBy("date", "desc"));
@@ -111,7 +108,7 @@ const Shop = function ({
   const downloadReceipt = () => {
     if (cart.length === 0) return alert("Bag empty!");
     if (!details.name || !details.region) return alert("Please enter your Name and Region first.");
-    const itemDetails = cart.map(i => `${i.name} (x${i.qty}) - ${formatGHS(i.price * i.qty)}`).join("\n");
+    const itemDetails = cart.map(i => `${i.name} (x${i.qty}) - ${i.chosenSize ? 'Size: '+i.chosenSize : ''} - ${formatGHS(i.price * i.qty)}`).join("\n");
     const receiptText = `NEX-TREND RECEIPT\nCustomer: ${details.name}\nTotal: ${formatGHS(cartTotal)}\n\nItems:\n${itemDetails}`;
     const element = document.createElement("a");
     const file = new Blob([receiptText], { type: "text/plain" });
@@ -139,7 +136,7 @@ const Shop = function ({
           name: details.name, phone: details.phone, region: details.region,
           location: details.location + (geoLink ? " (GPS)" : ""),
           total: cartTotal, receiptUrl: reader.result, date: new Date().toISOString(),
-          items: cart.map(i => `${i.name} (x${i.qty})`).join(", "), status: "pending",
+          items: cart.map(i => `${i.name} (x${i.qty}) ${i.chosenSize ? "[Size: "+i.chosenSize+"]" : ""}`).join(", "), status: "pending",
         });
         setShowSuccess(true); setCart([]); setIsUploading(false);
       } catch (e) { alert("Error sending order."); setIsUploading(false); }
@@ -237,9 +234,9 @@ const Shop = function ({
                 <p style={styles.popPrice}>{formatGHS(selected.price)}</p>
                 <p style={styles.popDesc}>{selected.desc}</p>
                 
-                <div style={{ display: "flex", gap: "25px", alignItems: "flex-end", marginBottom: "40px" }}>
+                <div style={{ display: "flex", gap: "15px", flexWrap: "wrap", marginBottom: "40px" }}>
                   {selected.colors && (
-                    <div style={{ flex: 1 }}>
+                    <div style={{ flex: 1, minWidth: "120px" }}>
                       <p style={styles.miniLab}>COLOR</p>
                       <select onChange={(e) => setColor(e.target.value)} style={styles.luxeSel}>
                         <option value="">Choose...</option>
@@ -247,7 +244,19 @@ const Shop = function ({
                       </select>
                     </div>
                   )}
-                  <div style={{ flex: 1.5 }}>
+
+                  {/* CORRECTED: SIZE DROPDOWN ADDED HERE */}
+                  {selected.sizes && (
+                    <div style={{ flex: 1, minWidth: "120px" }}>
+                      <p style={styles.miniLab}>SIZE</p>
+                      <select onChange={(e) => setSelSize(e.target.value)} style={styles.luxeSel}>
+                        <option value="">Choose...</option>
+                        {selected.sizes.split(",").map((s) => (<option key={s} value={s.trim()}>{s.trim()}</option>))}
+                      </select>
+                    </div>
+                  )}
+
+                  <div style={{ flex: 1.5, minWidth: "200px" }}>
                     <p style={styles.miniLab}>QUANTITY</p>
                     <div style={{ display: "flex", alignItems: "center", gap: "15px" }}>
                       <div style={styles.qtyFlex}>
@@ -282,6 +291,9 @@ const Shop = function ({
                   <div key={idx} style={styles.cartItemStyle}>
                     <div style={{ flex: 1 }}>
                       <p style={{ margin: 0, fontWeight: "900", color: "#000" }}>{item.name}</p>
+                      <p style={{ margin: 0, fontSize: "12px", color: "#666" }}>
+                        {item.selColor && `Color: ${item.selColor}`} {item.chosenSize && `| Size: ${item.chosenSize}`}
+                      </p>
                       <p style={{ margin: 0, color: "#D4AF37", fontSize: "15px", fontWeight: "800" }}>{formatGHS(item.price * item.qty)} (x{item.qty})</p>
                     </div>
                     <Trash2 size={18} onClick={() => setCart(cart.filter((_, i) => i !== idx))} color="red" style={{cursor:'pointer'}} />
