@@ -87,7 +87,6 @@ export default function App() {
             box-sizing: border-box;
         }
 
-        /* Responsive adjustments for PC */
         @media (min-width: 769px) {
             .action-bar {
                 padding: 15px 40px;
@@ -158,7 +157,6 @@ export default function App() {
 
       {/* STICKY NAVIGATION SYSTEM */}
       <div className="nav-container">
-        {/* Top Row: Menu, Logo, Icons */}
         <div className="action-bar">
           <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
             <Menu onClick={() => setIsMenuOpen(true)} style={{ cursor: "pointer" }} size={28} />
@@ -180,7 +178,6 @@ export default function App() {
           </div>
         </div>
 
-        {/* Search Row */}
         <div className="search-row">
             <div style={searchWrapper}>
                 <Search size={18} color="#D4AF37" />
@@ -188,7 +185,6 @@ export default function App() {
             </div>
         </div>
 
-        {/* Category Scroller */}
         <div className="cat-scroll">
           {categories.map((cat) => (
             <button key={cat.name} onClick={() => handleCategoryChange(cat.name)} style={catBubble}>
@@ -209,6 +205,7 @@ export default function App() {
       <footer style={luxuryFooter}>
         <h2 style={{ fontFamily: "Playfair Display", letterSpacing: "6px", fontSize: "32px" }}>NEX<span style={{ color: "#D4AF37" }}>TREND</span></h2>
         <p style={footerTag}>YOUR WISH IS OUR COMMAND</p>
+        <p style={{ fontSize: "10px", letterSpacing: "2px", opacity: 0.8, color: "#D4AF37", marginBottom: "20px" }}>HOME OF UNIQUE LUXURY</p>
         <div style={contactBox}>
           <div style={contactItem}><Mail size={18} color="#D4AF37" /><a href="mailto:Asirifigraceantwiwaa@gmail.com" style={{ color: "#fff", textDecoration: "none" }}>Asirifigraceantwiwaa@gmail.com</a></div>
           <div style={contactItem}><Phone size={18} color="#D4AF37" /><span>Manager: +233 50 400 3676</span></div>
